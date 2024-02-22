@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.clevertec.entity.News;
 import ru.clevertec.entity.TextComment;
 import ru.clevertec.util.ConstFormatDate;
 
@@ -28,7 +27,7 @@ public class CommentResponseDTO {
     @Schema(description = "Текст комментария.")
     private TextComment textComment = new TextComment();
 
-    @Builder.Default
-    @Schema(description = "Новости.")
-    private News news = new News();
+//    @Builder.Default
+//    @Schema(description = "Новости.")
+//    private News news = new News();
 }

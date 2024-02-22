@@ -1,5 +1,6 @@
 package ru.clevertec.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -33,11 +34,11 @@ public class TextComment {
     @Column(name = "text")
     private String text;
 
-    @Builder.Default
+    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Schema(description = "Комментарий.")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "comment_id", referencedColumnName = "id")
-    private Comment comment = new Comment();
+    private Comment comment;
 }

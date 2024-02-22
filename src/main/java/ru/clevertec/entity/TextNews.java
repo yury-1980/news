@@ -1,5 +1,6 @@
 package ru.clevertec.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,11 +35,11 @@ public class TextNews {
     @Column(name = "text")
     private String text;
 
-    @Builder.Default
+    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Schema(description = "Новость.")
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "news_id", referencedColumnName = "id")
-    private News news = new News();
+    private News news;
 }

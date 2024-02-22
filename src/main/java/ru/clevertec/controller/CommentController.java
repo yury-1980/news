@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.clevertec.dto.requestDTO.CommentRequestDTO;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
-import ru.clevertec.entity.Comment;
 import ru.clevertec.service.CommentService;
 
 import java.util.List;
@@ -29,8 +28,8 @@ public class CommentController {
 
     @PostMapping("/{id}")
     @Operation(summary = "Создание Comment.")
-    public ResponseEntity<Comment> create(@RequestBody CommentRequestDTO commentRequestDTO,
-                                          @PathVariable("id") Long idNews) {
+    public ResponseEntity<CommentResponseDTO> create(@RequestBody CommentRequestDTO commentRequestDTO,
+                                                     @PathVariable("id") Long idNews) {
 
         return ResponseEntity.ok(service.create(commentRequestDTO, idNews));
     }
@@ -52,7 +51,8 @@ public class CommentController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Частичное обновление Comment.")
-    public ResponseEntity<CommentResponseDTO> updatePatch(@RequestBody CommentRequestDTO commentRequestDTO, Long idComment) {
+    public ResponseEntity<CommentResponseDTO> updatePatch(@RequestBody CommentRequestDTO commentRequestDTO,
+                                                          @PathVariable("id") Long idComment) {
 
         return ResponseEntity.ok(service.updatePatch(commentRequestDTO, idComment));
     }

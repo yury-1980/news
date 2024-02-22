@@ -3,6 +3,7 @@ package ru.clevertec.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.dto.requestDTO.CommentRequestDTO;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.entity.Comment;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
 
     private final NewsRepository newsRepository;
@@ -26,24 +28,29 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Создание Comment
+     *
      * @param commentRequestDTO commentRequestDTO
-     * @param idNews idNews
+     * @param idNews            idNews
      * @return Comment
      */
     @Override
-    public Comment create(CommentRequestDTO commentRequestDTO, Long idNews) {
+    @Transactional
+    public CommentResponseDTO create(CommentRequestDTO commentRequestDTO, Long idNews) {
         News news = newsRepository.findById(idNews)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
 
         Comment comment = mapper.toComment(commentRequestDTO);
         comment.setTime(LocalDateTime.now());
         comment.setNews(news);
+        comment.getTextComment().setComment(comment);
+        news.getComments().add(comment);
 
-        return repository.save(comment);
+        return mapper.toCommentResponseDto(repository.save(comment));
     }
 
     /**
      * Поиск Comment по его id
+     *
      * @param idComment idComment
      * @return CommentResponseDTO
      */
@@ -56,8 +63,9 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Вывод заданной страницы, с размером страницы
+     *
      * @param pageNumber Номер страницы
-     * @param pageSize размером страницы
+     * @param pageSize   размером страницы
      * @return List, список найденных
      */
     @Override
@@ -72,17 +80,19 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Частичное обновление News
+     *
      * @param commentRequestDTO commentRequestDTO
-     * @param idComment idComment
+     * @param idComment         idComment
      * @return CommentResponseDTO
      */
     @Override
+    @Transactional
     public CommentResponseDTO updatePatch(CommentRequestDTO commentRequestDTO, Long idComment) {
         Comment comment = repository.findById(idComment)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
 
         if (commentRequestDTO.getTextComment() != null) {
-            comment.setTextComment(commentRequestDTO.getTextComment());
+            comment.getTextComment().setText(commentRequestDTO.getTextComment().getText());
         }
 
         return mapper.toCommentResponseDto(repository.save(comment));
@@ -90,9 +100,11 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * Удаление Comment по его id
+     *
      * @param idComment idComment
      */
     @Override
+    @Transactional
     public void delete(Long idComment) {
         repository.findById(idComment)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));

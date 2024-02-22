@@ -6,13 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.clevertec.entity.Comment;
 import ru.clevertec.entity.TextNews;
 import ru.clevertec.util.ConstFormatDate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Builder
@@ -30,7 +27,7 @@ public class NewsResponseDTO {
     @Schema(description = "Текст новости.")
     private TextNews textNews = new TextNews();
 
-    @Builder.Default
-    @Schema(description = "Комментарии к новости.")
-    private List<Comment> comments = new ArrayList<>();
+//    @Builder.Default
+//    @Schema(description = "Комментарии к новости.")
+//    private List<Comment> comments = new ArrayList<>();
 }

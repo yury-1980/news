@@ -1,5 +1,6 @@
 package ru.clevertec.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,6 +19,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.clevertec.util.ConstFormatDate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -41,13 +43,14 @@ public class News {
     @Column(name = "time")
     @Schema(description = "Дата и время создания.")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ConstFormatDate.FORMAT)
     private LocalDateTime time;
 
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @Schema(description = "Текст новости.")
-    @OneToOne(mappedBy = "news", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    @OneToOne(mappedBy = "news", fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private TextNews textNews = new TextNews();
 
     @Builder.Default

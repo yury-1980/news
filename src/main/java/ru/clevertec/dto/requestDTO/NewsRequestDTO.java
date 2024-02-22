@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NewsRequestDTO {
 
-    //    private Long id;// TODO: 19-02-2024: elfkbnm
     private String title;
 
     @Schema(description = "Дата и время создания.")
@@ -27,7 +26,7 @@ public class NewsRequestDTO {
     @Builder.Default
     @Schema(description = "Текст новости.")
     private TextNews textNews = new TextNews();
-// TODO: 19-02-2024: Возможно удалить
+
 //    @Builder.Default
 //    @Schema(description = "Комментарии к новости.")
 //    private List<Comment> comments = new ArrayList<>();

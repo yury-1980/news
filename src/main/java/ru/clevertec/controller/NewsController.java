@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
-import ru.clevertec.entity.News;
 import ru.clevertec.service.NewsService;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class NewsController {
 
     @PostMapping
     @Operation(summary = "Создание News.")
-    public ResponseEntity<News> create(@RequestBody NewsRequestDTO newsRequestDTO) {
+    public ResponseEntity<NewsResponseDTO> create(@RequestBody NewsRequestDTO newsRequestDTO) {
 
         return ResponseEntity.ok(service.create(newsRequestDTO));
     }
@@ -51,7 +50,8 @@ public class NewsController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Частичное обновление News.")
-    public ResponseEntity<NewsResponseDTO> updatePatch(@RequestBody NewsRequestDTO newsRequestDTO, Long idNews) {
+    public ResponseEntity<NewsResponseDTO> updatePatch(@RequestBody NewsRequestDTO newsRequestDTO,
+                                                       @PathVariable("id") Long idNews) {
 
         return ResponseEntity.ok(service.updatePatch(newsRequestDTO, idNews));
     }

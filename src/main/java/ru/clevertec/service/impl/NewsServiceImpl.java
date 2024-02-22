@@ -3,6 +3,7 @@ package ru.clevertec.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
 import ru.clevertec.entity.News;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NewsServiceImpl implements NewsService {
 
     private final NewsRepository repository;
@@ -28,15 +30,18 @@ public class NewsServiceImpl implements NewsService {
      * @return News
      */
     @Override
-    public News create(NewsRequestDTO newsRequestDTO) {
+    @Transactional
+    public NewsResponseDTO create(NewsRequestDTO newsRequestDTO) {
         News news = mapper.toNews(newsRequestDTO);
         news.setTime(LocalDateTime.now());
+        news.getTextNews().setNews(news);
 
-        return repository.save(news);
+        return mapper.toNewsResponseDTO(repository.save(news));
     }
 
     /**
      * Поиск News по его id
+     *
      * @param idNews idNews
      * @return NewsResponseDTO
      */
@@ -50,8 +55,9 @@ public class NewsServiceImpl implements NewsService {
 
     /**
      * Вывод заданной страницы, с размером страницы
+     *
      * @param pageNumber Номер страницы
-     * @param pageSize размером страницы
+     * @param pageSize   размером страницы
      * @return List, список найденных
      */
     @Override
@@ -66,11 +72,13 @@ public class NewsServiceImpl implements NewsService {
 
     /**
      * Частичное обновление News
+     *
      * @param newsRequestDTO newsRequestDTO
-     * @param idNews idNews
+     * @param idNews         idNews
      * @return NewsResponseDTO
      */
     @Override
+    @Transactional
     public NewsResponseDTO updatePatch(NewsRequestDTO newsRequestDTO, Long idNews) {
         News news = repository.findById(idNews)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
@@ -80,7 +88,7 @@ public class NewsServiceImpl implements NewsService {
         }
 
         if (newsRequestDTO.getTextNews() != null) {
-            news.setTextNews(newsRequestDTO.getTextNews());
+            news.getTextNews().setText(newsRequestDTO.getTextNews().getText());
         }
 
         return mapper.toNewsResponseDTO(repository.save(news));
@@ -88,9 +96,11 @@ public class NewsServiceImpl implements NewsService {
 
     /**
      * Удаление News по его id
+     *
      * @param idNews idNews
      */
     @Override
+    @Transactional
     public void delete(Long idNews) {
         repository.findById(idNews)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
