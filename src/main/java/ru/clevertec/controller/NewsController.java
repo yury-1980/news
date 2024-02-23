@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
+import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
 import ru.clevertec.service.NewsService;
 
@@ -46,6 +47,23 @@ public class NewsController {
                                                            @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAll(pageNumber, pageSize));
+    }
+
+    @GetMapping("/{newsId}/comments")
+    @Operation(summary = "Выбор заданного News, по его id и его комментариев.")
+    public ResponseEntity<List<CommentResponseDTO>> findByIdNewsAndComments(@PathVariable("newsId") Long idNews,
+                                                                            @RequestParam(defaultValue = "0") int pageNumber,
+                                                                            @RequestParam(defaultValue = "15") int pageSize) {
+
+        return ResponseEntity.ok(service.findByIdNewsAndComments(idNews, pageNumber, pageSize));
+    }
+
+    @GetMapping("/{newsId}/comments/{commentsId}")
+    @Operation(summary = "Выбор заданного News, по его id и комментария этого News по id.")
+    public ResponseEntity<CommentResponseDTO> findByIdNewsAndIdComments(@PathVariable("newsId") Long idNews,
+                                                                        @PathVariable("commentsId") Long idComment) {
+
+        return ResponseEntity.ok(service.findByIdNewsAndIdComments(idNews, idComment));
     }
 
     @PatchMapping("/{id}")

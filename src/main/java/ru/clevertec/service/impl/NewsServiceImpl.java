@@ -5,10 +5,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
+import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
+import ru.clevertec.entity.Comment;
 import ru.clevertec.entity.News;
 import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.mapper.CommentsMapper;
 import ru.clevertec.mapper.NewsMapper;
+import ru.clevertec.repository.CommentRepository;
 import ru.clevertec.repository.NewsRepository;
 import ru.clevertec.service.NewsService;
 
@@ -22,6 +26,8 @@ public class NewsServiceImpl implements NewsService {
 
     private final NewsRepository repository;
     private final NewsMapper mapper;
+    private final CommentRepository commentRepository;
+    private final CommentsMapper commentsMapper;
 
     /**
      * Создание News
@@ -68,6 +74,37 @@ public class NewsServiceImpl implements NewsService {
                 .stream()
                 .map(mapper::toNewsResponseDTO)
                 .toList();
+    }
+
+    /**
+     * Поиск News по его id и её комментариев
+     *
+     * @param idNews idNews
+     * @return NewsCommentsRequestDto
+     */
+    @Override
+    public List<CommentResponseDTO> findByIdNewsAndComments(Long idNews, int pageNumber, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+
+        return commentRepository.findCommentsByNews_Id(idNews, pageRequest).stream()
+                .map(commentsMapper::toCommentResponseDto)
+                .toList();
+    }
+
+    /**
+     * Поиск News по его id и его комментария по id
+     *
+     * @param idNews idNews
+     * @return NewsCommentsRequestDto
+     */
+    @Override
+    public CommentResponseDTO findByIdNewsAndIdComments(Long idNews, Long idComment) {
+
+        repository.findById(idNews)
+                .orElseThrow(() -> EntityNotFoundExeption.of(News.class));
+
+        return commentsMapper.toCommentResponseDto(commentRepository.findCommentByIdAndNews_Id(idNews, idComment)
+                .orElseThrow(() -> EntityNotFoundExeption.of(Comment.class)));
     }
 
     /**

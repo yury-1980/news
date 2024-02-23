@@ -49,6 +49,7 @@ public class Comment {
     @OneToOne(mappedBy = "comment", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private TextComment textComment = new TextComment();
 
+    // TODO: 23-02-2024: удалить @JsonIgnore
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

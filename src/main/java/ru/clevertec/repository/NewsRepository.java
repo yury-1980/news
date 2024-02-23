@@ -12,4 +12,6 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     @NonNull
     @EntityGraph(attributePaths = {"textNews"})
     Optional<News> findById(@NonNull Long idNews);
+
+    Optional<News> findByIdAndCommentsId(Long idNews, Long idComment);// TODO: 23-02-2024: Спросить из какого репозитория лучше брать?
 }
