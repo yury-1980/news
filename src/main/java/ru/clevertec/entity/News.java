@@ -18,6 +18,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.clevertec.util.ConstFormatDate;
 
@@ -27,6 +29,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Indexed
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,6 +40,7 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @FullTextField
     @Column(name = "title")
     private String title;
 

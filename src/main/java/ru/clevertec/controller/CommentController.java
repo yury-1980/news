@@ -65,4 +65,12 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .build();
     }
+
+    @GetMapping("/names/{str}")
+    public ResponseEntity<List<CommentResponseDTO>> findByAllComentsByName(@PathVariable("str") String string,
+                                                              @RequestParam(defaultValue = "0") int pageNumber,
+                                                              @RequestParam(defaultValue = "15") int pageSize) {
+
+        return ResponseEntity.ok(service.findByAllComentsByName(string, pageNumber, pageSize));
+    }
 }

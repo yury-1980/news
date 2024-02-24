@@ -18,12 +18,18 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.springframework.format.annotation.DateTimeFormat;
+import ru.clevertec.util.bridge.TextCommentBridge;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity
+@Indexed
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,14 +40,22 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @FullTextField
     @Column(name = "user_name")
     private String userName;
 
+    @GenericField
     @Column(name = "time")
     @Schema(description = "Дата и время создания.")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime time;
 
+//    @Convert(converter = ISBNAttributeConverter.class)
+    @FullTextField(
+            valueBridge = @ValueBridgeRef(type = TextCommentBridge.class)
+//            normalizer = "textComment"
+    )
+//    @IndexedEmbedded
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -49,7 +63,6 @@ public class Comment {
     @OneToOne(mappedBy = "comment", fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private TextComment textComment = new TextComment();
 
-    // TODO: 23-02-2024: удалить @JsonIgnore
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

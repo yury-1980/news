@@ -143,4 +143,9 @@ public class NewsServiceImpl implements NewsService {
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
         repository.deleteById(idNews);
     }
+
+    @Override
+    public List<NewsResponseDTO> findByAllNewsByTitle(String string, int pageNumber, int pageSize) {
+        return null;
+    }
 }

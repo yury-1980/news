@@ -1,6 +1,11 @@
 package ru.clevertec.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.search.engine.search.query.SearchResult;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +22,7 @@ import ru.clevertec.service.CommentService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
     private final NewsRepository newsRepository;
     private final CommentRepository repository;
     private final CommentsMapper mapper;
+    private final EntityManager entityManager;
 
     /**
      * Создание Comment
@@ -109,5 +116,28 @@ public class CommentServiceImpl implements CommentService {
         repository.findById(idComment)
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
         repository.deleteById(idComment);
+    }
+
+    @Override
+    public List<CommentResponseDTO> findByAllComentsByName(String string, int pageNumber, int pageSize) {
+        int start = pageNumber * pageSize;
+
+        SearchSession searchSession = Search.session(entityManager);
+        SearchResult<Comment> result = searchSession.search(Comment.class)
+                .where(f -> f.match().fields("userName", "textComment").matching(string)
+                        .fuzzy(2))
+                .fetch(start, pageSize);
+
+        long totalHitCount = result.total().hitCount();
+        List<Comment> hits = result.hits();
+
+        log.info("Найдено комментариев: " + totalHitCount);
+        for (Comment hit : hits) {
+            log.info("Комментарий: " + hit.getTextComment().getText());
+        }
+
+        return hits.stream()
+                .map(mapper::toCommentResponseDto)
+                .toList();
     }
 }

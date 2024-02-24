@@ -13,4 +13,6 @@ public interface NewsService extends Service<NewsResponseDTO, NewsRequestDTO> {
     List<CommentResponseDTO> findByIdNewsAndComments(Long idNews, int pageNumber, int pageSize);
 
     CommentResponseDTO findByIdNewsAndIdComments(Long idNews, Long idComment);
+
+    List<NewsResponseDTO> findByAllNewsByTitle(String string, int pageNumber, int pageSize);
 }
