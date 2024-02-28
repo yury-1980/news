@@ -6,13 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.clevertec.entity.TextNews;
+import lombok.ToString;
 import ru.clevertec.util.ConstFormatDate;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewsRequestDTO {
@@ -23,11 +24,6 @@ public class NewsRequestDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ConstFormatDate.FORMAT)
     private LocalDateTime time;
 
-    @Builder.Default
     @Schema(description = "Текст новости.")
-    private TextNews textNews = new TextNews();
-
-//    @Builder.Default
-//    @Schema(description = "Комментарии к новости.")
-//    private List<Comment> comments = new ArrayList<>();
+    private String textNews;
 }

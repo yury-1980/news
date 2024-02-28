@@ -11,4 +11,7 @@ public interface Service<U, E> {
     U updatePatch(E e, Long id);
 
     void delete(Long id);
+
+    List<U> findByAllTextsByPhrase(String predicate, int pageNumber, int pageSize);
+
 }

@@ -2,18 +2,17 @@ package ru.clevertec.config;
 
 
 import jakarta.persistence.EntityManager;
+import lombok.AllArgsConstructor;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
 import org.hibernate.search.mapper.orm.session.SearchSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
-
+@AllArgsConstructor
 public class HibernateSearchConfiguration {
 
-    @Autowired
     private EntityManager entityManager;
 
     @Bean
@@ -26,23 +25,4 @@ public class HibernateSearchConfiguration {
 
         return searchSession;
     }
-
-//    @Bean
-//    public FullTextEntityManager fullTextEntityManager() throws InterruptedException {
-////        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-//        return Search.getFullTextEntityManager((javax.persistence.EntityManager) entityManager);
-//    }
-//
-//
-//
-//
-//    @PostConstruct
-//    public void initializeHibernateSearch() {
-//        try {
-//            FullTextEntityManager fullTextEntityManager = fullTextEntityManager();
-//            fullTextEntityManager.createIndexer().startAndWait();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }

@@ -1,24 +1,31 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/news
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/news
+#    username: postgres
+#    password: postgres
+#    driver-class-name: org.postgresql.Driver
+
   jpa:
     show-sql: true
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-#        search:
-#          backend:
-#          default:
-#            directory_provider: filesystem
-#            indexBase: /data/index/default
+  #        search:
+  #          backend:
+  #          default:
+  #            directory_provider: filesystem
+  #            indexBase: /data/index/default
+
   liquibase:
     change-log: classpath:/db/changelog/master.yaml
     enabled: true
+
+  profiles:
+    active: prod
+
 Cache:
   capacity: 5
+
 exception:
   enabled: true

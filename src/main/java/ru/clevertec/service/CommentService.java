@@ -9,5 +9,5 @@ public interface CommentService extends Service<CommentResponseDTO, CommentReque
 
     CommentResponseDTO create(CommentRequestDTO commentRequestDTO, Long idNews);
 
-    List<CommentResponseDTO> findByAllComentsByName(String string, int pageNumber, int pageSize);
+    List<CommentResponseDTO> findByAllComentsByPredicateName(String predicate, int pageNumber, int pageSize);
 }

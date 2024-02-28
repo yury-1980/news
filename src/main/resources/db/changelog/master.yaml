@@ -13,9 +13,9 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: /db/v0.0/dml/news.sql
-        - sqlFile:
-            path: /db/v0.0/dml/text_news.sql
+        #        - sqlFile:
+        #            path: /db/v0.0/dml/text_news.sql
         - sqlFile:
             path: /db/v0.0/dml/comment.sql
-        - sqlFile:
-            path: /db/v0.0/dml/text_comment.sql
+#        - sqlFile:
+#            path: /db/v0.0/dml/text_comment.sql

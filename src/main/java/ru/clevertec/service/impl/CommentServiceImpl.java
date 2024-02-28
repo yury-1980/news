@@ -3,6 +3,7 @@ package ru.clevertec.service.impl;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
@@ -28,6 +29,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class CommentServiceImpl implements CommentService {
 
+    final static String USER_NAME = "userName";
+    final static String TEXT_COMMENT = "textComment";
+    final static int SLOP = 3;
+
     private final NewsRepository newsRepository;
     private final CommentRepository repository;
     private final CommentsMapper mapper;
@@ -49,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = mapper.toComment(commentRequestDTO);
         comment.setTime(LocalDateTime.now());
         comment.setNews(news);
-        comment.getTextComment().setComment(comment);
+        comment.setTextComment(commentRequestDTO.getTextComment());
         news.getComments().add(comment);
 
         return mapper.toCommentResponseDto(repository.save(comment));
@@ -73,7 +78,7 @@ public class CommentServiceImpl implements CommentService {
      *
      * @param pageNumber Номер страницы
      * @param pageSize   размером страницы
-     * @return List, список найденных
+     * @return List, список найденных комментариев
      */
     @Override
     public List<CommentResponseDTO> findByAll(int pageNumber, int pageSize) {
@@ -99,7 +104,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
 
         if (commentRequestDTO.getTextComment() != null) {
-            comment.getTextComment().setText(commentRequestDTO.getTextComment().getText());
+            comment.setTextComment(commentRequestDTO.getTextComment());
         }
 
         return mapper.toCommentResponseDto(repository.save(comment));
@@ -118,25 +123,69 @@ public class CommentServiceImpl implements CommentService {
         repository.deleteById(idComment);
     }
 
+    /**
+     * Запросы с подстановочными знаками
+     *
+     * @param predicate  Буква или набор букв из имени
+     * @param pageNumber Номер страницы
+     * @param pageSize   размером страницы
+     * @return List<CommentResponseDTO>
+     */
     @Override
-    public List<CommentResponseDTO> findByAllComentsByName(String string, int pageNumber, int pageSize) {
+    public List<CommentResponseDTO> findByAllComentsByPredicateName(String predicate, int pageNumber, int pageSize) {
+        SearchSession searchSession = Search.session(entityManager);
+
+        SearchPredicate userNamePredicate = searchSession.scope(Comment.class)
+                .predicate()
+                .wildcard()
+                .field(USER_NAME)
+                .matching("*" + predicate + "*")
+                .toPredicate();
+
+        return predicateOrphrase(searchSession, userNamePredicate, pageNumber, pageSize);
+    }
+
+    /**
+     * Фразовые запросы
+     *
+     * @param phrase     Фраза из комментария.
+     * @param pageNumber Номер страницы
+     * @param pageSize   размером страницы
+     * @return List<CommentResponseDTO>
+     */
+    @Override
+    public List<CommentResponseDTO> findByAllTextsByPhrase(String phrase, int pageNumber, int pageSize) {
+        SearchSession searchSession = Search.session(entityManager);
+
+        SearchPredicate predicate = searchSession.scope(Comment.class)
+                .predicate()
+                .phrase()
+                .field(TEXT_COMMENT)
+                .matching(phrase)
+                .slop(SLOP)
+                .toPredicate();
+
+        return predicateOrphrase(searchSession, predicate, pageNumber, pageSize);
+    }
+
+    private List<CommentResponseDTO> predicateOrphrase(SearchSession searchSession, SearchPredicate predicate,
+                                                       int pageNumber, int pageSize) {
         int start = pageNumber * pageSize;
 
-        SearchSession searchSession = Search.session(entityManager);
         SearchResult<Comment> result = searchSession.search(Comment.class)
-                .where(f -> f.match().fields("userName", "textComment").matching(string)
-                        .fuzzy(2))
+                .where(predicate)
                 .fetch(start, pageSize);
 
         long totalHitCount = result.total().hitCount();
-        List<Comment> hits = result.hits();
+        List<Comment> comments = result.hits();
 
         log.info("Найдено комментариев: " + totalHitCount);
-        for (Comment hit : hits) {
-            log.info("Комментарий: " + hit.getTextComment().getText());
+
+        for (Comment hit : comments) {
+            log.info("Комментарий: " + hit.getTextComment());
         }
 
-        return hits.stream()
+        return comments.stream()
                 .map(mapper::toCommentResponseDto)
                 .toList();
     }

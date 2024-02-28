@@ -13,5 +13,5 @@ public interface NewsMapper {
 
     News toNews(NewsRequestDTO newsRequestDTO);
 
-    NewsCommentsResponseDto toNewsCommentsResponseDto (News news);
+    NewsCommentsResponseDto toNewsCommentsResponseDto(News news);
 }

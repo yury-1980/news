@@ -25,10 +25,6 @@ public class NewsCommentsResponseDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ConstFormatDate.FORMAT)
     private LocalDateTime time;
 
-//    @Builder.Default
-//    @Schema(description = "Текст новости.")
-//    private TextNews textNews = new TextNews();
-
     @Builder.Default
     @Schema(description = "Комментарии к новости.")
     private List<Comment> comments = new ArrayList<>();

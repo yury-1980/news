@@ -6,13 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import ru.clevertec.entity.TextComment;
+import lombok.ToString;
 import ru.clevertec.util.ConstFormatDate;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequestDTO {
@@ -23,11 +24,6 @@ public class CommentRequestDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ConstFormatDate.FORMAT)
     private LocalDateTime time;
 
-    @Builder.Default
     @Schema(description = "Текст комментария.")
-    private TextComment textComment = new TextComment();
-
-//    @Builder.Default
-//    @Schema(description = "Новости.")
-//    private News news = new News();
+    private String textComment;
 }

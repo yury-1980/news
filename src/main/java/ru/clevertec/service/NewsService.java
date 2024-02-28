@@ -1,7 +1,7 @@
 package ru.clevertec.service;
 
-import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
+import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
 
 import java.util.List;
@@ -14,5 +14,5 @@ public interface NewsService extends Service<NewsResponseDTO, NewsRequestDTO> {
 
     CommentResponseDTO findByIdNewsAndIdComments(Long idNews, Long idComment);
 
-    List<NewsResponseDTO> findByAllNewsByTitle(String string, int pageNumber, int pageSize);
+    List<NewsResponseDTO> findByAllNewsByPredicateTitle(String string, int pageNumber, int pageSize);
 }

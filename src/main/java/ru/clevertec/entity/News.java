@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,12 +49,9 @@ public class News {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = ConstFormatDate.FORMAT)
     private LocalDateTime time;
 
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    @Schema(description = "Текст новости.")
-    @OneToOne(mappedBy = "news", fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    private TextNews textNews = new TextNews();
+    @FullTextField
+    @Column(name = "text_news")
+    private String textNews;
 
     @Builder.Default
     @ToString.Exclude
