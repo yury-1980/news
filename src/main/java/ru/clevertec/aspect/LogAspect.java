@@ -19,6 +19,12 @@ import java.util.Objects;
 @AllArgsConstructor
 public class LogAspect {
 
+    /**
+     * Будет выполнен после успешного возврата значения из методов контроллера, помеченных аннотацией @MyLogController.
+     *
+     * @param joinPoint точка соединения, представляющая вызов метода в контроллере.
+     * @param result возвращаемое значение из метода контроллера.
+     */
     @AfterReturning(value = "@annotation(ru.clevertec.annotation.MyLogController)", returning = "result")
     public void logging(JoinPoint joinPoint, Object result) {
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(

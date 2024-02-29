@@ -74,10 +74,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * Вывод заданной страницы, с размером страницы
+     * Вывод заданной страницы и количество результатов на ней.
      *
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List, список найденных комментариев
      */
     @Override
@@ -127,8 +127,8 @@ public class CommentServiceImpl implements CommentService {
      * Запросы с подстановочными знаками
      *
      * @param predicate  Буква или набор букв из имени
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List<CommentResponseDTO>
      */
     @Override
@@ -149,8 +149,8 @@ public class CommentServiceImpl implements CommentService {
      * Фразовые запросы
      *
      * @param phrase     Фраза из комментария.
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List<CommentResponseDTO>
      */
     @Override
@@ -168,6 +168,16 @@ public class CommentServiceImpl implements CommentService {
         return predicateOrphrase(searchSession, predicate, pageNumber, pageSize);
     }
 
+    /**
+     * Выполняет поиск комментариев в индексе с использованием предиката или фразы
+     * и возвращает список объектов CommentResponseDTO, содержащих результаты поиска.
+     *
+     * @param searchSession используется для выполнения поиска.
+     * @param predicate предикат или фраза, определяющая условия поиска.
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize количество результатов на странице.
+     * @return список объектов CommentResponseDTO.
+     */
     private List<CommentResponseDTO> predicateOrphrase(SearchSession searchSession, SearchPredicate predicate,
                                                        int pageNumber, int pageSize) {
         int start = pageNumber * pageSize;

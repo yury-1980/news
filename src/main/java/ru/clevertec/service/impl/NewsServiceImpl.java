@@ -78,10 +78,10 @@ public class NewsServiceImpl implements NewsService {
     }
 
     /**
-     * Вывод заданной страницы, с размером страницы
+     * Вывод заданной страницы и количество результатов на ней.
      *
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List, список найденных
      */
     @Override
@@ -169,8 +169,8 @@ public class NewsServiceImpl implements NewsService {
      * Запросы с подстановочными знаками
      *
      * @param predicate  Буква или набор букв из Title
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List<NewsResponseDTO>
      */
     @Override
@@ -184,15 +184,15 @@ public class NewsServiceImpl implements NewsService {
                 .matching("*" + predicate + "*")
                 .toPredicate();
 
-        return predicateOrphrase(searchSession, userNamePredicate, pageNumber, pageSize);
+        return predicateOrPhrase(searchSession, userNamePredicate, pageNumber, pageSize);
     }
 
     /**
      * Фразовые запросы
      *
      * @param phrase     Фраза из текста новости.
-     * @param pageNumber Номер страницы
-     * @param pageSize   размером страницы
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize   количество результатов на странице.
      * @return List<NewsResponseDTO>
      */
     @Override
@@ -207,11 +207,21 @@ public class NewsServiceImpl implements NewsService {
                 .slop(SLOP)
                 .toPredicate();
 
-        return predicateOrphrase(searchSession, predicate, pageNumber, pageSize);
+        return predicateOrPhrase(searchSession, predicate, pageNumber, pageSize);
     }
 
-    private List<NewsResponseDTO> predicateOrphrase(SearchSession searchSession, SearchPredicate predicate,
-                                                       int pageNumber, int pageSize) {
+    /**
+     * Выполняет поиск новостей в индексе с использованием предиката или фразы
+     * и возвращает список объектов NewsResponseDTO, содержащих результаты поиска.
+     *
+     * @param searchSession используется для выполнения поиска.
+     * @param predicate предикат или фраза, определяющая условия поиска.
+     * @param pageNumber номер страницы результатов, начиная с 0.
+     * @param pageSize количество результатов на странице.
+     * @return список объектов NewsResponseDTO.
+     */
+    private List<NewsResponseDTO> predicateOrPhrase(SearchSession searchSession, SearchPredicate predicate,
+                                                    int pageNumber, int pageSize) {
         int start = pageNumber * pageSize;
 
         SearchResult<News> result = searchSession.search(News.class)
