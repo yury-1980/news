@@ -1,14 +1,13 @@
-package ru.clevertec.eurekaserver;
+package ru.clevertec;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-//@EnableEurekaServer
 @SpringBootApplication
-public class EurekaServerApplication {
+public class UserRoleApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(EurekaServerApplication.class, args);
+		SpringApplication.run(UserRoleApplication.class, args);
 	}
 
 }

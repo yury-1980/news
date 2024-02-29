@@ -15,13 +15,4 @@ services:
       - '5432:5432'
     restart: unless-stopped
 
-  db_users:
-    image: postgres:16-alpine
-    container_name: users
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: users
-      POSTGRES_USER: postgres
-    ports:
-      - '5433:5432'
-    restart: unless-stopped
+

@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: user-role
+  config:
+    import: configserver:http://localhost:8888
+
+  profiles:
+    active: prod

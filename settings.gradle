@@ -1,5 +1,6 @@
 rootProject.name = 'news'
 
-includeBuild 'eureka'
+//includeBuild 'eureka'
 includeBuild 'gateway'
 includeBuild 'config'
+includeBuild 'news-comment'

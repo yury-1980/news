@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    username: test
+    password: test
+
+  liquibase:
+    change-log: classpath:/db/changelog/master.yaml
+    enabled: true
