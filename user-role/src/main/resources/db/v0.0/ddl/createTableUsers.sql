@@ -1,12 +1,13 @@
-DROP TYPE IF EXISTS users_type;
-CREATE TYPE users_type AS ENUM ('ADMIN', 'JOURNALIST', 'SUBSCRIBER');
+DROP TYPE IF EXISTS role;
+CREATE TYPE role AS ENUM ('ADMIN', 'JOURNALIST', 'SUBSCRIBER');
 
 CREATE TABLE IF NOT EXISTS users
 (
     id        SERIAL PRIMARY KEY NOT NULL UNIQUE,
     user_name VARCHAR(64)        NOT NULL,
-    type      users_type         NOT NULL,
-    password  VARCHAR            NOT NULL UNIQUE
+    email     VARCHAR(64)        NOT NULL,
+    password  VARCHAR            NOT NULL UNIQUE,
+    role      role               NOT NULL
 );
 
 alter table users

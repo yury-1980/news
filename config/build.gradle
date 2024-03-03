@@ -21,6 +21,8 @@ ext {
 
 dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-config-server'
+	implementation project(':exeption-starter')
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
@@ -28,6 +30,14 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+tasks.register('startProject') {
+	dependsOn(':exeption-starter:build')
+}
+
+tasks.named('classes') {
+	dependsOn('startProject')
 }
 
 tasks.named('test') {
