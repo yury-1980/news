@@ -11,7 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import ru.clevertec.cache.Cache;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
-import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.exception.EntityNotFoundException;
 
 @Slf4j
 @Aspect
@@ -31,7 +31,7 @@ public class CacheCommentAspect {
      *
      * @param joinPoint Точка внедрения кода в метод CommentServiceImpl.findById()
      * @return CommentResponseDTO.
-     * @throws EntityNotFoundExeption если не найден.
+     * @throws EntityNotFoundException если не найден.
      */
     @Around("execution(* ru.clevertec.service.impl.CommentServiceImpl.findById(..))")
     public CommentResponseDTO aroundfindByUUID(ProceedingJoinPoint joinPoint) {
@@ -53,7 +53,7 @@ public class CacheCommentAspect {
                 log.info("Объект взят из базы !");
 
             } catch (Throwable e) {
-                throw EntityNotFoundExeption.of(Long.class);
+                throw EntityNotFoundException.of(Long.class);
             }
             cache.put(id, commentResponseDTO);
 

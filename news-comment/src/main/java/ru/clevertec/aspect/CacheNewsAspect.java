@@ -11,7 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import ru.clevertec.cache.Cache;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
-import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.exception.EntityNotFoundException;
 
 @Slf4j
 @Aspect
@@ -31,7 +31,7 @@ public class CacheNewsAspect {
      *
      * @param joinPoint Точка внедрения кода в метод NewsServiceImpl.findById()
      * @return NewsResponseDTO.
-     * @throws EntityNotFoundExeption если не найден.
+     * @throws EntityNotFoundException если не найден.
      */
     @Around("@annotation(ru.clevertec.annotation.MyFind)")
     public NewsResponseDTO aroundfindByID(ProceedingJoinPoint joinPoint) {
@@ -53,7 +53,7 @@ public class CacheNewsAspect {
                 log.info("Объект взят из базы !");
 
             } catch (Throwable e) {
-                throw EntityNotFoundExeption.of(Long.class);
+                throw EntityNotFoundException.of(Long.class);
             }
             cache.put(id, newsResponseDTO);
 

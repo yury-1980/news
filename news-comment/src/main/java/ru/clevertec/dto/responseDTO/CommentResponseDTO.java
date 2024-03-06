@@ -2,6 +2,8 @@ package ru.clevertec.dto.responseDTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +19,9 @@ import java.time.LocalDateTime;
 public class CommentResponseDTO {
 
     private Long id;
+
+    @NotBlank(message = "Имя автора не должен быть пустым")
+    @Size(max = 32, message = "Имя автора должно превышать 32 символов")
     private String userName;
 
     @Schema(description = "Дата и время создания.")
@@ -24,5 +29,6 @@ public class CommentResponseDTO {
     private LocalDateTime time;
 
     @Schema(description = "Текст комментария.")
+    @NotBlank(message = "Текст комментария не должен быть пустым")
     private String textComment;
 }

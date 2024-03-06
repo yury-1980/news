@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS news
     id        SERIAL PRIMARY KEY NOT NULL UNIQUE,
     title     VARCHAR            NOT NULL UNIQUE,
     time      TIMESTAMP          NOT NULL,
-    text_news TEXT               NOT NULL
+    text_news TEXT               NOT NULL,
+    author    VARCHAR(32)        NOT NULL
 );
 
 alter table news

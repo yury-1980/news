@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,6 +40,8 @@ public class Comment {
 
     @FullTextField
     @Column(name = "user_name")
+    @NotBlank(message = "Имя автора не должен быть пустым")
+    @Size(max = 32, message = "Имя автора должно превышать 32 символов")
     private String userName;
 
     @GenericField
@@ -48,6 +52,7 @@ public class Comment {
 
     @FullTextField
     @Column(name = "text_comment")
+    @NotBlank(message = "Текст комментария не должен быть пустым")
     private String textComment;
 
     @Builder.Default

@@ -81,14 +81,14 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
 
         if (node.getPrev() != null) {
             node.getPrev()
-                    .setNext(node.getNext());
+                .setNext(node.getNext());
         } else {
             head = node.getNext();
         }
 
         if (node.getNext() != null) {
             node.getNext()
-                    .setPrev(node.getPrev());
+                .setPrev(node.getPrev());
         } else {
             tail = node.getPrev();
         }

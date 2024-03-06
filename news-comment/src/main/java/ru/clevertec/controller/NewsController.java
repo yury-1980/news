@@ -1,9 +1,16 @@
 package ru.clevertec.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,10 +28,11 @@ import ru.clevertec.service.NewsService;
 
 import java.util.List;
 
+@Validated
 @RestController
-@MyLogController
 @RequiredArgsConstructor
 @RequestMapping("/news")
+@Tag(name = "Контроллер новостей", description = "Различные манипуляции с новостями")
 public class NewsController {
 
     private final NewsService service;
@@ -32,7 +40,7 @@ public class NewsController {
     @PostMapping
     @MyLogController
     @Operation(summary = "Создание News.")
-    public ResponseEntity<NewsResponseDTO> create(@RequestBody NewsRequestDTO newsRequestDTO) {
+    public ResponseEntity<NewsResponseDTO> create(@Valid @RequestBody NewsRequestDTO newsRequestDTO) {
 
         return ResponseEntity.ok(service.create(newsRequestDTO));
     }
@@ -40,7 +48,7 @@ public class NewsController {
     @MyLogController
     @GetMapping("/{id}")
     @Operation(summary = "Выбор заданного News, по его id.")
-    public ResponseEntity<NewsResponseDTO> findById(@PathVariable("id") Long idNews) {
+    public ResponseEntity<NewsResponseDTO> findById(@Positive @PathVariable("id") Long idNews) {
 
         return ResponseEntity.ok(service.findById(idNews));
     }
@@ -48,8 +56,8 @@ public class NewsController {
     @GetMapping
     @MyLogController
     @Operation(summary = "Выбор всех News из заданной страницы.")
-    public ResponseEntity<List<NewsResponseDTO>> findByAll(@RequestParam(defaultValue = "0") int pageNumber,
-                                                           @RequestParam(defaultValue = "15") int pageSize) {
+    public ResponseEntity<List<NewsResponseDTO>> findByAll(@PositiveOrZero @RequestParam(defaultValue = "0") int pageNumber,
+                                                           @Positive @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAll(pageNumber, pageSize));
     }
@@ -57,8 +65,12 @@ public class NewsController {
     @MyLogController
     @GetMapping("/{newsId}/comments")
     @Operation(summary = "Выбор заданного News, по его id и его комментариев.")
-    public ResponseEntity<List<CommentResponseDTO>> findByIdNewsAndComments(@PathVariable("newsId") Long idNews,
+    public ResponseEntity<List<CommentResponseDTO>> findByIdNewsAndComments(@Positive @PathVariable("newsId") Long idNews,
+
+                                                                            @PositiveOrZero
                                                                             @RequestParam(defaultValue = "0") int pageNumber,
+
+                                                                            @Positive
                                                                             @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByIdNewsAndComments(idNews, pageNumber, pageSize));
@@ -67,8 +79,8 @@ public class NewsController {
     @MyLogController
     @GetMapping("/{newsId}/comments/{commentsId}")
     @Operation(summary = "Выбор заданного News, по его id и комментария этого News по id.")
-    public ResponseEntity<CommentResponseDTO> findByIdNewsAndIdComments(@PathVariable("newsId") Long idNews,
-                                                                        @PathVariable("commentsId") Long idComment) {
+    public ResponseEntity<CommentResponseDTO> findByIdNewsAndIdComments(@Positive @PathVariable("newsId") Long idNews,
+                                                                        @Positive @PathVariable("commentsId") Long idComment) {
 
         return ResponseEntity.ok(service.findByIdNewsAndIdComments(idNews, idComment));
     }
@@ -76,28 +88,34 @@ public class NewsController {
     @MyLogController
     @PatchMapping("/{id}")
     @Operation(summary = "Частичное обновление News.")
-    public ResponseEntity<NewsResponseDTO> updatePatch(@RequestBody NewsRequestDTO newsRequestDTO,
-                                                       @PathVariable("id") Long idNews) {
+    public ResponseEntity<NewsResponseDTO> updatePatch(@Valid @RequestBody NewsRequestDTO newsRequestDTO,
+                                                       @Positive @PathVariable("id") Long idNews,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
 
-        return ResponseEntity.ok(service.updatePatch(newsRequestDTO, idNews));
+        return ResponseEntity.ok(service.updatePatch(newsRequestDTO, idNews, userDetails));
     }
 
     @MyLogController
     @DeleteMapping("/{id}")
     @Operation(summary = "Удаление News по его id.")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long idNews) {
-        service.delete(idNews);
+    public ResponseEntity<Void> delete(@Positive @PathVariable("id") Long idNews,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+        service.delete(idNews, userDetails);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .build();
+                             .build();
     }
 
     @MyLogController
     @GetMapping("/titles/{str}/predicate")
     @Operation(summary = "Запросы с подстановочными знаками")
     public ResponseEntity<List<NewsResponseDTO>> findByAllNewsByPredicateTitle(@PathVariable("str") String string,
-                                                                                 @RequestParam(defaultValue = "0") int pageNumber,
-                                                                                 @RequestParam(defaultValue = "15") int pageSize) {
+
+                                                                               @PositiveOrZero
+                                                                               @RequestParam(defaultValue = "0") int pageNumber,
+
+                                                                               @Positive
+                                                                               @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAllNewsByPredicateTitle(string, pageNumber, pageSize));
     }
@@ -106,7 +124,11 @@ public class NewsController {
     @GetMapping("/texts/{str}/phrase")
     @Operation(summary = "Фразовые запросы")
     public ResponseEntity<List<NewsResponseDTO>> findByAllTextsByPhrase(@PathVariable("str") String string,
+
+                                                                        @PositiveOrZero
                                                                         @RequestParam(defaultValue = "0") int pageNumber,
+
+                                                                        @Positive
                                                                         @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAllTextsByPhrase(string, pageNumber, pageSize));

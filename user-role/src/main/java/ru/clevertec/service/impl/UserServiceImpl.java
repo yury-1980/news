@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.dto.requestDTO.UserRequestDTO;
 import ru.clevertec.dto.responseDTO.UserResponseDTO;
 import ru.clevertec.entity.User;
-import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.exception.EntityNotFoundException;
 import ru.clevertec.mapper.UserMapper;
 import ru.clevertec.repository.UserRepository;
 
@@ -20,18 +20,20 @@ public class UserServiceImpl implements ru.clevertec.service.Service {
 
     /**
      * Создание нового User.
-     * @param userRequestDTO userRequestDTO
+     *
+     * @param user user
      * @return UserResponseDTO
      */
     @Override
     @Transactional
-    public UserResponseDTO create(UserRequestDTO userRequestDTO) {
+    public UserResponseDTO create(User user) {
 
-        return mapper.toUserResponseDto(repository.save(mapper.toUser(userRequestDTO)));
+        return mapper.toUserResponseDto(repository.save(user));
     }
 
     /**
      * Поиск User по его id в базе данных.
+     *
      * @param idUser id.
      * @return UserResponseDTO
      */
@@ -39,8 +41,8 @@ public class UserServiceImpl implements ru.clevertec.service.Service {
     public UserResponseDTO findById(Long idUser) {
 
         return repository.findById(idUser)
-                .map(mapper::toUserResponseDto)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                         .map(mapper::toUserResponseDto)
+                         .orElseThrow(() -> EntityNotFoundException.of(Long.class));
     }
 
     /**
@@ -54,14 +56,14 @@ public class UserServiceImpl implements ru.clevertec.service.Service {
     @Transactional
     public UserResponseDTO updatePatch(UserRequestDTO userRequestDTO, Long idUser) {
         User user = repository.findById(idUser)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                              .orElseThrow(() -> EntityNotFoundException.of(Long.class));
 
-        if (userRequestDTO.getUserName() != null) {
-            user.setUserName(userRequestDTO.getUserName());
+        if (userRequestDTO.getUsername() != null) {
+            user.setUsername(userRequestDTO.getUsername());
         }
 
-        if (userRequestDTO.getType() != null) {
-            user.setRole(userRequestDTO.getType());
+        if (userRequestDTO.getRole() != null) {
+            user.setRole(userRequestDTO.getRole());
         }
 
         if (userRequestDTO.getPassword() != null) {
@@ -69,6 +71,18 @@ public class UserServiceImpl implements ru.clevertec.service.Service {
         }
 
         return mapper.toUserResponseDto(user);
+    }
+
+    /**
+     * Поиск User по его email.
+     *
+     * @param username username.
+     * @return Объект User.
+     */
+    @Override
+    public User findByUsername(String username) {
+        return repository.findByUsername(username)
+                         .orElseThrow(() -> EntityNotFoundException.of(String.class));
     }
 
     /**
@@ -80,7 +94,7 @@ public class UserServiceImpl implements ru.clevertec.service.Service {
     @Transactional
     public void delete(long idUser) {
         repository.findById(idUser)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                  .orElseThrow(() -> EntityNotFoundException.of(Long.class));
         repository.deleteById(idUser);
     }
 }

@@ -11,6 +11,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,6 +43,7 @@ public class News {
 
     @FullTextField
     @Column(name = "title")
+    @NotBlank(message = "Название не должен быть пустым")
     private String title;
 
     @Column(name = "time")
@@ -51,7 +54,15 @@ public class News {
 
     @FullTextField
     @Column(name = "text_news")
+    @NotBlank(message = "Статья не должена быть пустым")
     private String textNews;
+
+    @FullTextField
+    @Column(name = "author")
+    @NotBlank(message = "Имя автора не должен быть пустым")
+    @Size(max = 32, message = "Имя автора должно превышать 32 символов")
+    private String author;
+
 
     @Builder.Default
     @ToString.Exclude

@@ -1,25 +1,27 @@
 package ru.clevertec.service.impl;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.search.engine.search.predicate.SearchPredicate;
 import org.hibernate.search.engine.search.query.SearchResult;
-import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.annotation.MyCreate;
 import ru.clevertec.annotation.MyDelete;
 import ru.clevertec.annotation.MyFind;
 import ru.clevertec.annotation.MyUpdate;
+import ru.clevertec.auth.AuthenticationService;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;
 import ru.clevertec.entity.Comment;
 import ru.clevertec.entity.News;
-import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.exception.EntityNotFoundException;
+import ru.clevertec.exception.WrongDataException;
 import ru.clevertec.mapper.CommentsMapper;
 import ru.clevertec.mapper.NewsMapper;
 import ru.clevertec.repository.CommentRepository;
@@ -35,15 +37,16 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class NewsServiceImpl implements NewsService {
 
-    final static String TITLE = "title";
-    final static String TEXT_NEWS = "textNews";
-    final static int SLOP = 3;
+    private final static String TITLE = "title";
+    private final static String TEXT_NEWS = "textNews";
+    private final static int SLOP = 3;
 
     private final NewsRepository repository;
     private final NewsMapper mapper;
     private final CommentRepository commentRepository;
     private final CommentsMapper commentsMapper;
-    private final EntityManager entityManager;
+    private final SearchSession searchSession;
+    private final AuthenticationService authenticationService;
 
     /**
      * Создание News
@@ -54,6 +57,7 @@ public class NewsServiceImpl implements NewsService {
     @MyCreate
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_JOURNALIST')")
     public NewsResponseDTO create(NewsRequestDTO newsRequestDTO) {
         News news = mapper.toNews(newsRequestDTO);
         news.setTime(LocalDateTime.now());
@@ -73,8 +77,8 @@ public class NewsServiceImpl implements NewsService {
     public NewsResponseDTO findById(Long idNews) {
 
         return repository.findById(idNews)
-                .map(mapper::toNewsResponseDTO)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                         .map(mapper::toNewsResponseDTO)
+                         .orElseThrow(() -> EntityNotFoundException.of(Long.class));
     }
 
     /**
@@ -89,9 +93,9 @@ public class NewsServiceImpl implements NewsService {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
 
         return repository.findAll(pageRequest)
-                .stream()
-                .map(mapper::toNewsResponseDTO)
-                .toList();
+                         .stream()
+                         .map(mapper::toNewsResponseDTO)
+                         .toList();
     }
 
     /**
@@ -105,8 +109,8 @@ public class NewsServiceImpl implements NewsService {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
 
         return commentRepository.findCommentsByNews_Id(idNews, pageRequest).stream()
-                .map(commentsMapper::toCommentResponseDto)
-                .toList();
+                                .map(commentsMapper::toCommentResponseDto)
+                                .toList();
     }
 
     /**
@@ -117,13 +121,13 @@ public class NewsServiceImpl implements NewsService {
      */
     @Override
     public CommentResponseDTO findByIdNewsAndIdComments(Long idNews, Long idComment) {
-
         repository.findById(idNews)
-                .orElseThrow(() -> EntityNotFoundExeption.of(News.class));
+                  .orElseThrow(() -> EntityNotFoundException.of(News.class));
 
-        return commentsMapper.toCommentResponseDto(commentRepository.findCommentByIdAndNews_Id(idNews, idComment)
-                                                           .orElseThrow(
-                                                                   () -> EntityNotFoundExeption.of(Comment.class)));
+        return commentsMapper.toCommentResponseDto(
+                commentRepository.findCommentByIdAndNews_Id(idNews, idComment).orElseThrow(
+                        () -> EntityNotFoundException.of(Comment.class))
+                                                  );
     }
 
     /**
@@ -136,16 +140,25 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @MyUpdate
     @Transactional
-    public NewsResponseDTO updatePatch(NewsRequestDTO newsRequestDTO, Long idNews) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_JOURNALIST')")
+    public NewsResponseDTO updatePatch(NewsRequestDTO newsRequestDTO,
+                                       Long idNews, UserDetails userDetails) {
+
         News news = repository.findById(idNews)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                              .orElseThrow(() -> EntityNotFoundException.of(Long.class));
 
-        if (newsRequestDTO.getTitle() != null) {
-            news.setTitle(newsRequestDTO.getTitle());
-        }
+        if (news.getAuthor().equals(userDetails.getUsername())) {
 
-        if (newsRequestDTO.getTextNews() != null) {
-            news.setTextNews(newsRequestDTO.getTextNews());
+            if (newsRequestDTO.getTitle() != null) {
+                news.setTitle(newsRequestDTO.getTitle());
+            }
+
+            if (newsRequestDTO.getTextNews() != null) {
+                news.setTextNews(newsRequestDTO.getTextNews());
+            }
+        } else {
+            log.error("Invalid name");
+            throw WrongDataException.of(String.class);
         }
 
         return mapper.toNewsResponseDTO(repository.save(news));
@@ -159,10 +172,18 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @MyDelete
     @Transactional
-    public void delete(Long idNews) {
-        repository.findById(idNews)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
-        repository.deleteById(idNews);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_JOURNALIST')")
+    public void delete(Long idNews, UserDetails userDetails) {
+        News news = repository.findById(idNews)
+                              .orElseThrow(() -> EntityNotFoundException.of(Long.class));
+
+        if (news.getAuthor().equals(userDetails.getUsername())) {
+            repository.deleteById(idNews);
+
+        } else {
+            log.error("Invalid name");
+            throw WrongDataException.of(String.class);
+        }
     }
 
     /**
@@ -175,14 +196,12 @@ public class NewsServiceImpl implements NewsService {
      */
     @Override
     public List<NewsResponseDTO> findByAllNewsByPredicateTitle(String predicate, int pageNumber, int pageSize) {
-        SearchSession searchSession = Search.session(entityManager);
-
         SearchPredicate userNamePredicate = searchSession.scope(News.class)
-                .predicate()
-                .wildcard()
-                .field(TITLE)
-                .matching("*" + predicate + "*")
-                .toPredicate();
+                                                         .predicate()
+                                                         .wildcard()
+                                                         .field(TITLE)
+                                                         .matching("*" + predicate + "*")
+                                                         .toPredicate();
 
         return predicateOrPhrase(searchSession, userNamePredicate, pageNumber, pageSize);
     }
@@ -197,15 +216,13 @@ public class NewsServiceImpl implements NewsService {
      */
     @Override
     public List<NewsResponseDTO> findByAllTextsByPhrase(String phrase, int pageNumber, int pageSize) {
-        SearchSession searchSession = Search.session(entityManager);
-
         SearchPredicate predicate = searchSession.scope(News.class)
-                .predicate()
-                .phrase()
-                .field(TEXT_NEWS)
-                .matching(phrase)
-                .slop(SLOP)
-                .toPredicate();
+                                                 .predicate()
+                                                 .phrase()
+                                                 .field(TEXT_NEWS)
+                                                 .matching(phrase)
+                                                 .slop(SLOP)
+                                                 .toPredicate();
 
         return predicateOrPhrase(searchSession, predicate, pageNumber, pageSize);
     }
@@ -215,9 +232,9 @@ public class NewsServiceImpl implements NewsService {
      * и возвращает список объектов NewsResponseDTO, содержащих результаты поиска.
      *
      * @param searchSession используется для выполнения поиска.
-     * @param predicate предикат или фраза, определяющая условия поиска.
-     * @param pageNumber номер страницы результатов, начиная с 0.
-     * @param pageSize количество результатов на странице.
+     * @param predicate     предикат или фраза, определяющая условия поиска.
+     * @param pageNumber    номер страницы результатов, начиная с 0.
+     * @param pageSize      количество результатов на странице.
      * @return список объектов NewsResponseDTO.
      */
     private List<NewsResponseDTO> predicateOrPhrase(SearchSession searchSession, SearchPredicate predicate,
@@ -225,8 +242,8 @@ public class NewsServiceImpl implements NewsService {
         int start = pageNumber * pageSize;
 
         SearchResult<News> result = searchSession.search(News.class)
-                .where(predicate)
-                .fetch(start, pageSize);
+                                                 .where(predicate)
+                                                 .fetch(start, pageSize);
 
         long totalHitCount = result.total().hitCount();
         List<News> news = result.hits();
@@ -238,7 +255,7 @@ public class NewsServiceImpl implements NewsService {
         }
 
         return news.stream()
-                .map(mapper::toNewsResponseDTO)
-                .toList();
+                   .map(mapper::toNewsResponseDTO)
+                   .toList();
     }
 }

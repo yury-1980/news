@@ -8,13 +8,16 @@ import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.clevertec.dto.requestDTO.CommentRequestDTO;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.entity.Comment;
 import ru.clevertec.entity.News;
-import ru.clevertec.exeption.EntityNotFoundExeption;
+import ru.clevertec.exception.EntityNotFoundException;
+import ru.clevertec.exception.WrongDataException;
 import ru.clevertec.mapper.CommentsMapper;
 import ru.clevertec.repository.CommentRepository;
 import ru.clevertec.repository.NewsRepository;
@@ -47,9 +50,10 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     @Transactional
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SUBSCRIBER')")
     public CommentResponseDTO create(CommentRequestDTO commentRequestDTO, Long idNews) {
         News news = newsRepository.findById(idNews)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                                  .orElseThrow(() -> EntityNotFoundException.of(Long.class));
 
         Comment comment = mapper.toComment(commentRequestDTO);
         comment.setTime(LocalDateTime.now());
@@ -69,8 +73,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentResponseDTO findById(Long idComment) {
         return repository.findById(idComment)
-                .map(mapper::toCommentResponseDto)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                         .map(mapper::toCommentResponseDto)
+                         .orElseThrow(() -> EntityNotFoundException.of(Long.class));
     }
 
     /**
@@ -85,9 +89,9 @@ public class CommentServiceImpl implements CommentService {
         PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
 
         return repository.findAll(pageRequest)
-                .stream()
-                .map(mapper::toCommentResponseDto)
-                .toList();
+                         .stream()
+                         .map(mapper::toCommentResponseDto)
+                         .toList();
     }
 
     /**
@@ -99,14 +103,19 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     @Transactional
-    public CommentResponseDTO updatePatch(CommentRequestDTO commentRequestDTO, Long idComment) {
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SUBSCRIBER')")
+    public CommentResponseDTO updatePatch(CommentRequestDTO commentRequestDTO, Long idComment, UserDetails userDetails) {
         Comment comment = repository.findById(idComment)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
+                                    .orElseThrow(() -> EntityNotFoundException.of(Long.class));
+        if (comment.getUserName().equals(userDetails.getUsername())) {
 
-        if (commentRequestDTO.getTextComment() != null) {
-            comment.setTextComment(commentRequestDTO.getTextComment());
+            if (commentRequestDTO.getTextComment() != null) {
+                comment.setTextComment(commentRequestDTO.getTextComment());
+            }
+        } else {
+            log.error("Invalid name");
+            throw WrongDataException.of(String.class);
         }
-
         return mapper.toCommentResponseDto(repository.save(comment));
     }
 
@@ -117,10 +126,18 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     @Transactional
-    public void delete(Long idComment) {
-        repository.findById(idComment)
-                .orElseThrow(() -> EntityNotFoundExeption.of(Long.class));
-        repository.deleteById(idComment);
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SUBSCRIBER')")
+    public void delete(Long idComment, UserDetails userDetails) {
+        Comment comment = repository.findById(idComment)
+                                    .orElseThrow(() -> EntityNotFoundException.of(Long.class));
+
+        if (comment.getUserName().equals(userDetails.getUsername())) {
+            repository.deleteById(idComment);
+
+        } else {
+            log.error("Invalid name");
+            throw WrongDataException.of(String.class);
+        }
     }
 
     /**
@@ -136,11 +153,11 @@ public class CommentServiceImpl implements CommentService {
         SearchSession searchSession = Search.session(entityManager);
 
         SearchPredicate userNamePredicate = searchSession.scope(Comment.class)
-                .predicate()
-                .wildcard()
-                .field(USER_NAME)
-                .matching("*" + predicate + "*")
-                .toPredicate();
+                                                         .predicate()
+                                                         .wildcard()
+                                                         .field(USER_NAME)
+                                                         .matching("*" + predicate + "*")
+                                                         .toPredicate();
 
         return predicateOrphrase(searchSession, userNamePredicate, pageNumber, pageSize);
     }
@@ -158,12 +175,12 @@ public class CommentServiceImpl implements CommentService {
         SearchSession searchSession = Search.session(entityManager);
 
         SearchPredicate predicate = searchSession.scope(Comment.class)
-                .predicate()
-                .phrase()
-                .field(TEXT_COMMENT)
-                .matching(phrase)
-                .slop(SLOP)
-                .toPredicate();
+                                                 .predicate()
+                                                 .phrase()
+                                                 .field(TEXT_COMMENT)
+                                                 .matching(phrase)
+                                                 .slop(SLOP)
+                                                 .toPredicate();
 
         return predicateOrphrase(searchSession, predicate, pageNumber, pageSize);
     }
@@ -173,9 +190,9 @@ public class CommentServiceImpl implements CommentService {
      * и возвращает список объектов CommentResponseDTO, содержащих результаты поиска.
      *
      * @param searchSession используется для выполнения поиска.
-     * @param predicate предикат или фраза, определяющая условия поиска.
-     * @param pageNumber номер страницы результатов, начиная с 0.
-     * @param pageSize количество результатов на странице.
+     * @param predicate     предикат или фраза, определяющая условия поиска.
+     * @param pageNumber    номер страницы результатов, начиная с 0.
+     * @param pageSize      количество результатов на странице.
      * @return список объектов CommentResponseDTO.
      */
     private List<CommentResponseDTO> predicateOrphrase(SearchSession searchSession, SearchPredicate predicate,
@@ -183,8 +200,8 @@ public class CommentServiceImpl implements CommentService {
         int start = pageNumber * pageSize;
 
         SearchResult<Comment> result = searchSession.search(Comment.class)
-                .where(predicate)
-                .fetch(start, pageSize);
+                                                    .where(predicate)
+                                                    .fetch(start, pageSize);
 
         long totalHitCount = result.total().hitCount();
         List<Comment> comments = result.hits();
@@ -196,7 +213,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return comments.stream()
-                .map(mapper::toCommentResponseDto)
-                .toList();
+                       .map(mapper::toCommentResponseDto)
+                       .toList();
     }
 }

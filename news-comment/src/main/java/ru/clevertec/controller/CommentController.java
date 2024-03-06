@@ -1,9 +1,17 @@
 package ru.clevertec.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,9 +28,11 @@ import ru.clevertec.service.CommentService;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/comments")
+@Tag(name = "Контроллер комментариев", description = "Различные манипуляции с комментариями")
 public class CommentController {
 
     private final CommentService service;
@@ -30,8 +40,12 @@ public class CommentController {
     @MyLogController
     @PostMapping("/{id}")
     @Operation(summary = "Создание Comment.")
-    public ResponseEntity<CommentResponseDTO> create(@RequestBody CommentRequestDTO commentRequestDTO,
-                                                     @PathVariable("id") Long idNews) {
+    public ResponseEntity<CommentResponseDTO> create(@Valid @RequestBody CommentRequestDTO commentRequestDTO,
+
+                                                     @Positive
+                                                     @PathVariable("id")
+                                                     @Parameter(description = "ID Новость, для которой создаём комментарий")
+                                                     Long idNews) {
 
         return ResponseEntity.ok(service.create(commentRequestDTO, idNews));
     }
@@ -39,7 +53,7 @@ public class CommentController {
     @MyLogController
     @GetMapping("/{id}")
     @Operation(summary = "Выбор заданного Comment, по его id.")
-    public ResponseEntity<CommentResponseDTO> findById(@PathVariable("id") Long idComment) {
+    public ResponseEntity<CommentResponseDTO> findById(@Positive @PathVariable("id") Long idComment) {
 
         return ResponseEntity.ok(service.findById(idComment));
     }
@@ -47,8 +61,8 @@ public class CommentController {
     @GetMapping
     @MyLogController
     @Operation(summary = "Выбор всех Comment из заданной страницы.")
-    public ResponseEntity<List<CommentResponseDTO>> findByAll(@RequestParam(defaultValue = "0") int pageNumber,
-                                                              @RequestParam(defaultValue = "15") int pageSize) {
+    public ResponseEntity<List<CommentResponseDTO>> findByAll(@PositiveOrZero @RequestParam(defaultValue = "0") int pageNumber,
+                                                              @Positive @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAll(pageNumber, pageSize));
     }
@@ -56,27 +70,33 @@ public class CommentController {
     @MyLogController
     @PatchMapping("/{id}")
     @Operation(summary = "Частичное обновление Comment.")
-    public ResponseEntity<CommentResponseDTO> updatePatch(@RequestBody CommentRequestDTO commentRequestDTO,
-                                                          @PathVariable("id") Long idComment) {
+    public ResponseEntity<CommentResponseDTO> updatePatch(@Valid @RequestBody CommentRequestDTO commentRequestDTO,
+                                                          @Positive @PathVariable("id") Long idComment,
+                                                          @AuthenticationPrincipal UserDetails userDetails) {
 
-        return ResponseEntity.ok(service.updatePatch(commentRequestDTO, idComment));
+        return ResponseEntity.ok(service.updatePatch(commentRequestDTO, idComment, userDetails));
     }
 
     @MyLogController
     @DeleteMapping("/{id}")
     @Operation(summary = "Удаление Comment по его id.")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long idComment) {
-        service.delete(idComment);
+    public ResponseEntity<Void> delete(@Positive @PathVariable("id") Long idComment,
+                                       @AuthenticationPrincipal UserDetails userDetails) {
+        service.delete(idComment, userDetails);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                .build();
+                             .build();
     }
 
     @MyLogController
     @GetMapping("/names/{str}/predicate")
     @Operation(summary = "Запросы с подстановочными знаками")
     public ResponseEntity<List<CommentResponseDTO>> findByAllComentsByPredicateName(@PathVariable("str") String string,
+
+                                                                                    @PositiveOrZero
                                                                                     @RequestParam(defaultValue = "0") int pageNumber,
+
+                                                                                    @Positive
                                                                                     @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAllComentsByPredicateName(string, pageNumber, pageSize));
@@ -86,8 +106,12 @@ public class CommentController {
     @GetMapping("/texts/{str}/phrase")
     @Operation(summary = "Фразовые запросы")
     public ResponseEntity<List<CommentResponseDTO>> findByAllTextsByPhrase(@PathVariable("str") String string,
-                                                                             @RequestParam(defaultValue = "0") int pageNumber,
-                                                                             @RequestParam(defaultValue = "15") int pageSize) {
+
+                                                                           @PositiveOrZero
+                                                                           @RequestParam(defaultValue = "0") int pageNumber,
+
+                                                                           @Positive
+                                                                           @RequestParam(defaultValue = "15") int pageSize) {
 
         return ResponseEntity.ok(service.findByAllTextsByPhrase(string, pageNumber, pageSize));
     }

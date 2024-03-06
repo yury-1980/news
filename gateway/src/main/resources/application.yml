@@ -1,8 +1,0 @@
-server:
-  port: 8765
-# считывание настроек с помощью spring cloud config
-spring:
-  application:
-    name: gateway
-  config:
-    import: configserver:http://localhost:8888
