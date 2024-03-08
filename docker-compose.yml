@@ -1,0 +1,89 @@
+version: "3.1"
+
+networks:
+  app-network:
+    external: true
+
+services:
+
+  springbootConfig:
+    container_name: config
+    image: config
+    build:
+      context: ./config
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8888
+      server_port: 8888
+    ports:
+      - 8888:8888
+    networks:
+      - app-network
+
+  springbootNews:
+    container_name: news_comment
+    image: news_comment
+    build:
+      context: ./news-comment
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8080
+      server_port: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/news
+      SPRING_CONFIG_URL: http://springbootConfig:8888
+    ports:
+      - 8080:8080
+    depends_on:
+      db_users:
+        condition: service_started
+      springbootConfig:
+        condition: service_started
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: news
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: news
+      POSTGRES_USER: postgres
+    ports:
+      - '5432:5432'
+    networks:
+      - app-network
+
+  springbootUser:
+    container_name: user_role
+    image: user_role
+    build:
+      context: ./user-role
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8081
+      server_port: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db_users:5432/users
+      CONFIG_SERVICE_URL: http://config:8888
+    ports:
+      - 8081:8081
+    depends_on:
+      db_users:
+        condition: service_started
+      springbootConfig:
+        condition: service_started
+      springbootNews:
+        condition: service_started
+    networks:
+      - app-network
+
+  db_users:
+    image: postgres:16-alpine
+    container_name: users
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users
+      POSTGRES_USER: postgres
+    ports:
+      - '5433:5432'
+    networks:
+      - app-network

@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: news-comment
+  config:
+    import: configserver:http://localhost:8888
+
+  profiles:
+    active: prod
+
+exception:
+  enabled: true
+
+urls:
+  user-role: http://localhost:8081/users
