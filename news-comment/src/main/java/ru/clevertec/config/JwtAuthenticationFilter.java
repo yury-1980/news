@@ -13,17 +13,31 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.clevertec.service.JwtService;
 
 import java.io.IOException;
 
+/**
+ * Класс JwtAuthenticationFilter представляет фильтр аутентификации JWT.
+ * Фильтр проверяет наличие и валидность JWT-токена в заголовке запроса "Authorization",
+ * а затем устанавливает аутентификацию для пользователя, связанного с токеном.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-//    private final TokenRepository tokenRepository;
 
+    /**
+     * Метод doFilterInternal выполняет фильтрацию запросов.
+     *
+     * @param request  Запрос HttpServletRequest.
+     * @param response Ответ HttpServletResponse.
+     * @param filterChain Цепочка фильтров.
+     * @throws ServletException В случае ошибки при обработке запроса.
+     * @throws IOException      В случае ошибки ввода-вывода.
+     */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -47,10 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-//            var isTokenValid = tokenRepository.findByToken(jwt)
-//                                              .map(t -> !t.isExpired() && !t.isRevoked())
-//                                              .orElse(false);
-            if (jwtService.isTokenValid(jwt, userDetails)) { //&& isTokenValid) {
+            if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,

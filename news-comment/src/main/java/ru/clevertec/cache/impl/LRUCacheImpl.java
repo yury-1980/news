@@ -11,6 +11,12 @@ import ru.clevertec.cache.Cache;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс LRUCacheImpl представляет реализацию Least Recently Used (LRU) кэша.
+ *
+ * @param <K> Тип ключа
+ * @param <V> Тип значения
+ */
 @Slf4j
 @ToString
 @Component
@@ -32,6 +38,12 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
         log.info("Profile = prod");
     }
 
+    /**
+     * Получает значение по ключу из кэша.
+     *
+     * @param key Ключ
+     * @return Значение, соответствующее ключу, либо null, если ключ не найден
+     */
     @Override
     public V get(K key) {
 
@@ -46,6 +58,12 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
         return item.getValue();
     }
 
+    /**
+     * Помещает значение в кэш по ключу.
+     *
+     * @param key   Ключ
+     * @param value Значение
+     */
     @Override
     public void put(K key, V value) {
 
@@ -68,6 +86,11 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Удаляет значение из кэша по ключу.
+     *
+     * @param key Ключ
+     */
     public void remove(K key) {
 
         if (map.containsKey(key)) {
@@ -77,6 +100,11 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Удаляет узел из двусвязного списка.
+     *
+     * @param node Узел для удаления
+     */
     private void removeNode(Node<K, V> node) {
 
         if (node.getPrev() != null) {
@@ -94,6 +122,11 @@ public class LRUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Метод addToTail добавляет узел в конец двусвязного списка.
+     *
+     * @param node Узел для добавления.
+     */
     private void addToTail(Node<K, V> node) {
 
         if (tail != null) {

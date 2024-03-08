@@ -11,6 +11,12 @@ import ru.clevertec.cache.Cache;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Класс LFUCacheImpl представляет реализацию Least Frequently Used (LFU) кэша.
+ *
+ * @param <K> Тип ключа
+ * @param <V> Тип значения
+ */
 @Slf4j
 @ToString
 @Component
@@ -27,11 +33,20 @@ public class LFUCacheImpl<K, V> implements Cache<K, V> {
         this.map = new HashMap<>();
     }
 
+    /**
+     * Инициализация кэша после создания экземпляра объекта.
+     */
     @PostConstruct
     void init() {
         log.info("Profile = test");
     }
 
+    /**
+     * Получает значение по ключу из кэша.
+     *
+     * @param key Ключ
+     * @return Значение, соответствующее ключу, либо null, если ключ не найден
+     */
     public V get(K key) {
 
         if (map.get(key) == null) {
@@ -46,6 +61,12 @@ public class LFUCacheImpl<K, V> implements Cache<K, V> {
         return item.getValue();
     }
 
+    /**
+     * Помещает значение в кэш по ключу.
+     *
+     * @param key   Ключ
+     * @param value Значение
+     */
     public void put(K key, V value) {
 
         if (map.containsKey(key)) {
@@ -70,6 +91,11 @@ public class LFUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Удаляет значение из кэша по ключу.
+     *
+     * @param key Ключ
+     */
     public void remove(K key) {
 
         if (map.containsKey(key)) {
@@ -79,6 +105,11 @@ public class LFUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Удаляет узел из двусвязного списка.
+     *
+     * @param node Узел для удаления
+     */
     private void removeNode(Node<K, V> node) {
 
         if (node.getPrev() != null) {
@@ -96,6 +127,11 @@ public class LFUCacheImpl<K, V> implements Cache<K, V> {
         }
     }
 
+    /**
+     * Добавляет узел в двусвязный список с обновленной частотой.
+     *
+     * @param node Узел для добавления
+     */
     private void addNodeWithUpdatedFrequency(Node<K, V> node) {
 
         if (tail != null && head != null) {

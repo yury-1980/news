@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.clevertec.exception.ExceptionHandler;
+import ru.clevertec.exception.MyExceptionHandler;
 
 @Slf4j
 @Configuration
@@ -18,7 +18,7 @@ public class ExceptionAutoConfiguration {
     }
 
     @Bean
-    public ExceptionHandler exceptionHandler() {
-        return new ExceptionHandler();
+    public MyExceptionHandler exceptionHandler() {
+        return new MyExceptionHandler();
     }
 }

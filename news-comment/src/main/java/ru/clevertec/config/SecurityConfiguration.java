@@ -12,6 +12,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+/**
+ * Класс SecurityConfiguration представляет конфигурацию безопасности приложения.
+ * Он определяет правила аутентификации и авторизации для различных URL-шаблонов,
+ * а также регистрирует фильтры аутентификации.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

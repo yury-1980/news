@@ -21,7 +21,6 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> repository.findByUsername(email).getBody();
-        //.orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean
@@ -31,11 +30,6 @@ public class ApplicationConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-//    @Bean
-//    public AuditorAware<Integer> auditorAware() {
-//        return new ApplicationAuditAware();
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

@@ -14,7 +14,7 @@ import ru.clevertec.annotation.MyCreate;
 import ru.clevertec.annotation.MyDelete;
 import ru.clevertec.annotation.MyFind;
 import ru.clevertec.annotation.MyUpdate;
-import ru.clevertec.auth.AuthenticationService;
+import ru.clevertec.service.AuthenticationService;
 import ru.clevertec.dto.requestDTO.NewsRequestDTO;
 import ru.clevertec.dto.responseDTO.CommentResponseDTO;
 import ru.clevertec.dto.responseDTO.NewsResponseDTO;

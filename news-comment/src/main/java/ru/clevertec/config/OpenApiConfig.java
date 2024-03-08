@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
 
+/**
+ * Класс OpenApiConfig представляет конфигурацию OpenAPI для документирования API системы управления новостями,
+ * использующей Spring Security для аутентификации и авторизации.
+ */
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
@@ -18,8 +22,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 description = "OpenApi documentation for Spring Security",
                 title = "OpenApi News management system",
-                version = "1.0",
-                termsOfService = "Terms of service"
+                version = "1.0"
         ),
         servers = {
                 @Server(

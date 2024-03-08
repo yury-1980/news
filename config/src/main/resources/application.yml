@@ -9,7 +9,7 @@ spring:
       server:
         git:
           uri: https://github.com/yury-1980/finale-config.git
-          clone-on-start: true
+          clone-on-start: false
           basedir: file://c:/finale-config
           username: yury-1980
           password: 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

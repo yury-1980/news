@@ -13,8 +13,3 @@ CREATE TABLE IF NOT EXISTS users
 alter table users
     owner to postgres;
 
-
--- ALTER SEQUENCE comment_id_seq RESTART WITH 201;
-
-
-

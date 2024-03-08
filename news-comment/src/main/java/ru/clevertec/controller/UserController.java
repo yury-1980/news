@@ -1,6 +1,7 @@
 package ru.clevertec.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import ru.clevertec.service.UserService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
+@Tag(name = "Контроллер пользователей", description = "Различные манипуляции с пользователями")
 public class UserController {
 
     private final UserService service;

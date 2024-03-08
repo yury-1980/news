@@ -1,4 +1,4 @@
-package ru.clevertec.config;
+package ru.clevertec.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
