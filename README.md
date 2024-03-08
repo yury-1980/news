@@ -119,3 +119,5 @@ GET /omments/titles/{str}/predicate?pageNumber={pageNumber}&pageSize={pageSize}
 ```sh
 GET /comments/texts/{str}/phrase?pageNumber={pageNumber}&pageSize={pageSize}
 ```
+
+п.с. не уверен на счёт контейнеров, ночью ставились без ошибок(даже фото в телеграмме). Потом перестали после поправок. И backUp почему-то не помог. Может это только у меня.
