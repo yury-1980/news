@@ -1,12 +1,11 @@
-version: "3.1"
+version: "3.9"
 
 networks:
   app-network:
     external: true
 
 services:
-
-  springbootConfig:
+  config:
     container_name: config
     image: config
     build:
@@ -19,8 +18,14 @@ services:
       - 8888:8888
     networks:
       - app-network
+    healthcheck:
+      test: curl --fail http://localhost:8888/actuator/health || exit 1
+      interval: 30s
+      retries: 5
+      timeout: 10s
+      start_period: 1m
 
-  springbootNews:
+  news_comment:
     container_name: news_comment
     image: news_comment
     build:
@@ -30,14 +35,15 @@ services:
       PORT: 8080
       server_port: 8080
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/news
-      SPRING_CONFIG_URL: http://springbootConfig:8888
+      SPRING_PROFILES_ACTIVE: docker,prod
+      SPRING_CONFIG_IMPORT: configserver:http://config:8888
     ports:
       - 8080:8080
     depends_on:
-      db_users:
-        condition: service_started
-      springbootConfig:
-        condition: service_started
+      db:
+        condition: service_healthy
+      config:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -52,33 +58,32 @@ services:
       - '5432:5432'
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
 
-  springbootUser:
+  user_role:
     container_name: user_role
     image: user_role
     build:
       context: ./user-role
       dockerfile: Dockerfile
     environment:
-      PORT: 8081
-      server_port: 8081
       SPRING_DATASOURCE_URL: jdbc:postgresql://db_users:5432/users
-      CONFIG_SERVICE_URL: http://config:8888
+      SPRING_PROFILES_ACTIVE: docker
+      CONFIG_SERVICE_IMPORT: configserver:http://config:8888
     ports:
       - 8081:8081
     depends_on:
       db_users:
-        condition: service_started
-      springbootConfig:
-        condition: service_started
-      springbootNews:
-        condition: service_started
+        condition: service_healthy
+      config:
+        condition: service_healthy
     networks:
       - app-network
 
   db_users:
     image: postgres:16-alpine
-    container_name: users
+    container_name: db_users
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: users
@@ -87,3 +92,5 @@ services:
       - '5433:5432'
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]

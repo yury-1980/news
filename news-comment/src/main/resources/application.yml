@@ -1,12 +1,8 @@
 spring:
   application:
     name: news-comment
-  config:
-    import: configserver:http://localhost:8888
-
   profiles:
-    active: prod
-
+    active: local,prod
 exception:
   enabled: true
 
