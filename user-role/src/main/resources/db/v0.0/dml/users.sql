@@ -17,5 +17,5 @@ VALUES (DEFAULT, 'Вася', 'vasya@example.com', '$2a$10$S1LytuFXizplm.xZGmJPK.
         'ROLE_SUBSCRIBER'::role),
        (DEFAULT, 'Вова', 'vova@example.com', '$2a$10$UgHb59qTMIPQD6JQd1XDUulEIGOAdFtIc1JAw4p37kqGaP9fXoG/W',
         'ROLE_SUBSCRIBER'::role),
-       (DEFAULT, 'Маргарита', 'margarita@example.com', ' $2a$10$gCZ6hdRBGFnDpg1w2K6jCOe2wLLB604zaYmf6UyUvU0MKOveJGz26',
+       (DEFAULT, 'Маргарита', 'margarita@example.com', '$2a$10$gCZ6hdRBGFnDpg1w2K6jCOe2wLLB604zaYmf6UyUvU0MKOveJGz26',
         'ROLE_ADMIN'::role);

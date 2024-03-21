@@ -5,14 +5,16 @@
 
 
 FROM openjdk:17-alpine
-LABEL maintainer="Yuriy"
 WORKDIR /app
 COPY ./build/libs/*.jar /app/
 RUN apk update && apk add --no-cache bash
+#ENTRYPOINT ["java", "-jar", "news-comment-0.0.1-SNAPSHOT.jar", "--spring.profile.active=prod"]
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar"]
 CMD ["news-comment-0.0.1-SNAPSHOT.jar"]
-#
-#
+
+
+
 #FROM openjdk:17-alpine
 ##EXPOSE 8080
 #ARG JAR_FILE=build/libs/news-comment-0.0.1-SNAPSHOT.jar
