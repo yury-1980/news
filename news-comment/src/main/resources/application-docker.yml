@@ -1,0 +1,6 @@
+spring:
+  config:
+    import: configserver:http://config:8888
+
+exception:
+  enabled: true

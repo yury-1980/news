@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: news-comment
+
+  profiles:
+    active: local,prod
+
+exception:
+  enabled: true
+
+urls:
+  user-role: http://localhost:8081/users

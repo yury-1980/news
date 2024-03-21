@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: Yuri
+      changes:
+        - sqlFile:
+            path: /db/v0.0/ddl/createTableUsers.sql
+  - changeSet:
+      id: 2
+      author: Yuri
+      changes:
+        - sqlFile:
+            path: /db/v0.0/dml/users.sql
